@@ -1,0 +1,8 @@
+import requests
+
+url = 'https://www.google.com'
+response = requests.get(url)
+
+print(f'Status Code: {response.status_code}')
+print(f'Headers: {response.headers}')
+print(f'Content: {response.text[:500]}')  # Print first 500 characters
