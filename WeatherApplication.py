@@ -1,14 +1,34 @@
 import json
 import requests
+import os
 
-url = "https://api.openweathermap.org/data/3.0/onecall?lat=12.904023445195131&lon=77.62415139509889&appid=4a82a7ce7a2a2fcd0fa0ae278b8fb560"
-response = requests.get(url)
-print("Status Code:", response.status_code)
-print("Response Body:", response.json())
+def fetch_weather(lat, lon, api_key):
+    url = f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&appid={api_key}"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Raises HTTPError for bad responses
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"HTTP Request failed: {e}")
+        return None
 
-try:
-    file_name = "weather_data.json"
-    with open(file_name, 'w') as file:
-        json.dump(response.json(), file)
-except Exception as e:
-    print("An error occurred while writing to json file:", e)
+def save_json(data, file_name):
+    try:
+        with open(file_name, 'w') as file:
+            json.dump(data, file)
+        print(f"Data saved to {file_name}")
+    except (IOError, TypeError) as e:
+        print(f"Failed to write JSON: {e}")
+
+if __name__ == "__main__":
+    # Read API key from environment variable for security
+    api_key = os.getenv("OPENWEATHER_API_KEY")
+    if not api_key:
+        print("Error: OPENWEATHER_API_KEY is not set in environment variables.")
+    else:
+        lat = 12.904023445195131
+        lon = 77.62415139509889
+        weather_data = fetch_weather(lat, lon, api_key)
+        if weather_data is not None:
+            print("Weather Data:", weather_data)
+            save_json(weather_data, "weather_data.json")
